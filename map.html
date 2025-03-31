@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>百度地图 - 高亮黄冈市及县市区范围 (初始比例约20km)</title>
+    <title>百度地图 - 黄冈市黄州区街道乡镇范围 (初始比例约2km)</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <style type="text/css">
         body, html, #map_container {
@@ -20,7 +20,7 @@
         /* (可选) 提示信息样式 */
         #infoPanel {
              position: absolute;
-             bottom: 10px;
+             bottom: 30px; /* 调整位置，避免挡住比例尺 */
              left: 10px;
              background-color: rgba(255, 255, 255, 0.8);
              padding: 5px 10px;
@@ -39,137 +39,129 @@
     <div id="infoPanel">正在加载地图和边界数据...</div>
 
     <script type="text/javascript">
-        // --- Baidu Map Initialization ---
-        var infoPanel = document.getElementById('infoPanel'); // 获取提示面板元素
+        var infoPanel = document.getElementById('infoPanel');
 
         if (typeof BMap !== "undefined" && BMap.Map) {
-            var map = new BMap.Map("map_container", {
-                // minZoom: 9, // (可选) 限制最小缩放级别
-                // maxZoom: 12 // (可选) 限制最大缩放级别
-            });
+            var map = new BMap.Map("map_container");
 
             // --- 设置地图中心点和初始缩放级别 ---
-            var centerPoint = new BMap.Point(114.879779, 30.447395); // 黄冈市大致中心
-            // 尝试设置Zoom Level 10, 在此纬度下比例尺可能接近20km
-            // 您可以调整这个值 (9 或 11) 来观察比例尺变化
-            var initialZoom = 10;
+            // 黄州区的大致中心经纬度 (可以根据实际情况微调)
+            var centerPoint = new BMap.Point(114.885, 30.455); // 大约在黄州区政府附近
+            // 尝试设置Zoom Level 14, 在此纬度下比例尺可能接近2km
+            // 您可以调整这个值 (13 或 15) 来观察比例尺变化
+            var initialZoom = 14;
             map.centerAndZoom(centerPoint, initialZoom);
 
             map.enableScrollWheelZoom(true);
             map.enableContinuousZoom(true);
             map.addControl(new BMap.NavigationControl());
-            map.addControl(new BMap.ScaleControl({ anchor: BMAP_ANCHOR_BOTTOM_LEFT })); // 比例尺放左下角
-            map.addControl(new BMap.OverviewMapControl());
+            // 将比例尺放在左下角
+            map.addControl(new BMap.ScaleControl({ anchor: BMAP_ANCHOR_BOTTOM_LEFT }));
+            // 不再需要概览图，因为我们只关注黄州区
+            // map.addControl(new BMap.OverviewMapControl());
 
-            // --- 获取"黄冈市"整体边界用于创建遮罩 ---
+             // --- 获取"黄冈市黄州区"整体边界用于创建遮罩 ---
             var boundary = new BMap.Boundary();
-            var huanggangCityName = "黄冈市";
+            var huangzhouDistrictName = "黄冈市黄州区";
 
-            boundary.get(huanggangCityName, function(cityResult) {
-                if (cityResult && cityResult.boundaries && cityResult.boundaries.length > 0) {
-                    console.log("成功获取到 " + huanggangCityName + " 的整体边界。");
-                    infoPanel.innerHTML = "正在绘制高亮区域和区县边界...";
+            boundary.get(huangzhouDistrictName, function(districtResult) {
+                if (districtResult && districtResult.boundaries && districtResult.boundaries.length > 0) {
+                    console.log("成功获取到 " + huangzhouDistrictName + " 的整体边界。");
+                    infoPanel.innerHTML = "正在绘制高亮区域和街道乡镇边界...";
 
-                    // --- 创建外部遮罩效果 ---
-                    // 1. 定义一个非常大的区域覆盖整个可见地图外围
-                    //    这里的坐标需要足够大，确保能覆盖用户可能拖动的范围
-                    //    注意：百度地图坐标系可能不是标准的 WGS84，但大致范围适用
+                    // --- 创建外部遮罩效果 (同上一个例子) ---
                     var outerBoundary = [
                         new BMap.Point(-180, -90), new BMap.Point(180, -90),
                         new BMap.Point(180, 90), new BMap.Point(-180, 90)
                     ];
-
-                    // 2. 准备黄冈市边界数据点 (可能有多段)
-                    var huanggangPoints = [];
-                    cityResult.boundaries.forEach(function(boundaryStr) {
+                    var huangzhouPoints = [];
+                    districtResult.boundaries.forEach(function(boundaryStr) {
                         var points = boundaryStr.split(';').map(function(ptStr) {
                             var parts = ptStr.split(',');
                             return new BMap.Point(parseFloat(parts[0]), parseFloat(parts[1]));
                         });
-                        huanggangPoints.push(points); // 添加一个边界环
+                        huangzhouPoints.push(points);
                     });
 
-
-                    // 3. 创建一个"挖洞"的多边形作为遮罩
-                    //    第一个数组是外边界，后面的数组是内部"洞"的边界
-                    var maskPoints = [outerBoundary].concat(huanggangPoints);
-
+                    var maskPoints = [outerBoundary].concat(huangzhouPoints);
                     var maskPolygon = new BMap.Polygon(maskPoints, {
-                        fillColor: "#808080",   // 遮罩颜色 (灰色)
-                        fillOpacity: 0.5,     // 遮罩透明度 (0.0 - 1.0)
-                        strokeWeight: 0,      // 遮罩本身不需要边框
+                        fillColor: "#808080",
+                        fillOpacity: 0.6, // 可以稍微调高一点不透明度
+                        strokeWeight: 0,
                         strokeColor: "none"
                     });
                     map.addOverlay(maskPolygon);
-                    console.log("外部遮罩已添加。");
+                    console.log("黄州区外部遮罩已添加。");
 
-                    // --- 继续绘制黄冈市下辖各区县的边界 (在高亮区域内) ---
-                    drawSubDistricts();
+                    // --- 绘制黄州区下辖各街道乡镇的边界 ---
+                    drawSubUnits();
 
                 } else {
-                    console.error("未能获取到 '" + huanggangCityName + "' 的整体边界，无法创建高亮效果。");
-                    infoPanel.innerHTML = "错误：无法获取黄冈市边界，无法高亮。正在尝试加载区县...";
-                    // 即使无法高亮，仍然尝试绘制区县
-                    drawSubDistricts();
+                    console.error("未能获取到 '" + huangzhouDistrictName + "' 的整体边界，无法创建高亮效果。");
+                    infoPanel.innerHTML = "错误：无法获取黄州区边界，无法高亮。正在尝试加载街道乡镇...";
+                    // 即使无法高亮，也尝试绘制街道乡镇
+                    drawSubUnits();
                 }
             });
 
-            // --- 绘制黄冈市下辖各区县边界的函数 ---
-            function drawSubDistricts() {
-                var districts = [
-                    "黄冈市黄州区", "黄冈市团风县", "黄冈市红安县",
-                    "黄冈市罗田县", "黄冈市英山县", "黄冈市浠水县",
-                    "黄冈市蕲春县", "黄冈市黄梅县", "黄冈市武穴市",
-                    "黄冈市麻城市"
+            // --- 绘制黄州区下辖街道乡镇边界的函数 ---
+            function drawSubUnits() {
+                // 黄州区主要街道、乡、镇列表 (请根据实际情况核对或调整)
+                var subUnits = [
+                    "黄冈市黄州区赤壁街道", "黄冈市黄州区东湖街道", "黄冈市黄州区禹王街道",
+                    "黄冈市黄州区南湖街道", "黄冈市黄州区路口镇", "黄冈市黄州区堵城镇",
+                    "黄冈市黄州区陈策楼镇", "黄冈市黄州区陶店乡"
                 ];
-                var colors = ["#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",
-                              "#FFFF33", "#A65628", "#F781BF", "#999999", "#66C2A5"];
+                // 使用不同的、鲜明的颜色
+                var colors = ["#1f78b4", "#33a02c", "#e31a1c", "#ff7f00", "#6a3d9a",
+                              "#b15928", "#a6cee3", "#b2df8a", "#fb9a99", "#fdbf6f"];
                 var colorIndex = 0;
-                var loadedCount = 0; // 计数器，用于更新提示信息
+                var loadedCount = 0;
+                var totalUnits = subUnits.length;
 
-                districts.forEach(function(districtName) {
+                subUnits.forEach(function(unitName) {
                     var currentStrokeColor = colors[colorIndex % colors.length];
+                    var currentFillColor = colors[colorIndex % colors.length];
                     colorIndex++;
 
-                    boundary.get(districtName, function(result) {
+                    boundary.get(unitName, function(result) {
                         loadedCount++;
                         if (result && result.boundaries && result.boundaries.length > 0) {
-                            console.log("获取到 " + districtName + " 边界");
+                            console.log("获取到 " + unitName + " 边界");
                             var boundaryCount = result.boundaries.length;
                             for (var i = 0; i < boundaryCount; i++) {
                                 var polygon = new BMap.Polygon(result.boundaries[i], {
                                     strokeWeight: 2,
-                                    strokeColor: currentStrokeColor, // 使用鲜艳的边框色
-                                    strokeOpacity: 0.8,
-                                    fillColor: currentStrokeColor,     // 可以用同色填充
-                                    fillOpacity: 0.10        // 填充透明度低一些，突出边界线
+                                    strokeColor: currentStrokeColor, // 边框用醒目颜色
+                                    strokeOpacity: 0.9,
+                                    fillColor: currentFillColor,     // 填充用同色
+                                    fillOpacity: 0.25       // 填充透明度，以便看清底图
                                 });
                                 map.addOverlay(polygon);
                             }
                         } else {
-                            console.warn("未能获取到 '" + districtName + "' 的边界数据。");
+                            console.warn("未能获取到 '" + unitName + "' 的边界数据。名称可能不准确或无数据。");
                         }
 
                         // 更新加载提示
-                        if (loadedCount === districts.length) {
-                             infoPanel.innerHTML = "黄冈市及各区县边界加载完成。";
-                             // 可以设置延时后隐藏提示
+                        if (loadedCount === totalUnits) {
+                             infoPanel.innerHTML = "黄州区街道乡镇边界加载完成。";
                              setTimeout(function() { infoPanel.style.display = 'none'; }, 3000);
                         } else {
-                             infoPanel.innerHTML = `正在加载区县边界 (${loadedCount}/${districts.length})...`;
+                             infoPanel.innerHTML = `正在加载街道乡镇边界 (${loadedCount}/${totalUnits})...`;
                         }
                     });
                 });
-                 console.log("已开始请求所有区县的边界数据...");
+                console.log("已开始请求所有街道乡镇的边界数据...");
             }
 
         } else {
-            // Critical Error: Baidu Maps API script did not load correctly
+            // Critical Error
             var errorMsg = "错误：BMap API 未能成功加载！";
-            console.error(errorMsg + "请检查AK是否正确、网络是否通畅以及浏览器控制台(F12)报错信息。");
+            console.error(errorMsg + "请检查AK、网络及浏览器控制台(F12)。");
             alert(errorMsg);
-            infoPanel.innerHTML = errorMsg; // 在面板显示错误
-            document.getElementById('map_container').innerHTML = '<div style="padding: 20px; text-align: center; color: red;">' + errorMsg + '<br>请确认API密钥(AK)是否正确，网络连接正常，并检查浏览器控制台(F12)获取详细信息。</div>';
+            infoPanel.innerHTML = errorMsg;
+            document.getElementById('map_container').innerHTML = '<div style="padding: 20px; text-align: center; color: red;">' + errorMsg + '<br>请确认API密钥(AK)正确，网络通畅，并检查浏览器控制台(F12)。</div>';
         }
     </script>
 </body>
