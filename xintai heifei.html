@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 关键：确保移动设备正确缩放 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>招商差旅费用清单</title>
+    <style>
+        /* 基本样式重置和全局设置 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6; /* 淡雅背景色 */
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* 主要内容容器 */
+        .container {
+            max-width: 800px; /* 在大屏幕上限制宽度 */
+            margin: 20px auto; /* 页面居中，上下留白 */
+            padding: 15px;
+            background-color: #ffffff; /* 白色背景卡片 */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* 轻微阴影 */
+            border-radius: 8px; /* 圆角 */
+        }
+
+        /* 标题样式 */
+        h1 {
+            font-size: 1.5em; /* 适合移动端的标题大小 */
+            color: #2c3e50; /* 深蓝灰色 */
+            text-align: center;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0; /* 标题下划线 */
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 1.2em;
+            color: #3498db; /* 蓝色日期标题 */
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-left: 4px solid #3498db; /* 左侧装饰线 */
+            padding-left: 8px;
+        }
+
+        /* 行程时间信息 */
+        .trip-info {
+            text-align: center;
+            color: #555;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        /* 费用列表 */
+        ul.expense-list {
+            list-style: none; /* 去掉默认列表符号 */
+            padding: 0;
+            margin: 0;
+        }
+
+        ul.expense-list li {
+            background-color: #f9f9f9; /* 列表项淡背景 */
+            margin-bottom: 8px; /* 列表项间距 */
+            padding: 10px 15px;
+            border-radius: 4px;
+            display: flex; /* 使用 Flexbox 布局 */
+            justify-content: space-between; /* 项目和金额两端对齐 */
+            align-items: center; /* 垂直居中 */
+            border: 1px solid #eee; /* 细边框 */
+        }
+
+        /* 费用描述 */
+        .expense-description {
+            color: #444;
+            font-size: 0.95em;
+        }
+        .expense-description small { /* 额外说明，如路线 */
+             color: #777;
+             font-size: 0.85em;
+             display: block; /* 换行显示 */
+        }
+
+        /* 费用金额 */
+        .expense-amount {
+            font-weight: bold;
+            color: #e74c3c; /* 突出金额颜色 */
+            font-size: 1em;
+            white-space: nowrap; /* 防止金额换行 */
+            margin-left: 10px; /* 与描述保持一点距离 */
+        }
+
+        /* 合计区域 */
+        .total-section {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #e8f6f3; /* 淡绿色背景 */
+            border-top: 2px solid #1abc9c; /* 顶部强调线 */
+            border-radius: 0 0 8px 8px; /* 底部圆角 */
+            text-align: right; /* 文字右对齐 */
+        }
+
+        .total-label {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #16a085; /* 强调合计标签 */
+        }
+
+        .total-amount {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #c0392b; /* 突出总金额颜色 */
+            margin-left: 10px;
+        }
+
+        /* 针对非常小的屏幕可能需要微调字体 */
+        @media (max-width: 360px) {
+            h1 { font-size: 1.3em; }
+            .container { padding: 10px; margin: 10px; }
+            ul.expense-list li { padding: 8px 10px; }
+            .expense-description { font-size: 0.9em; }
+            .total-label { font-size: 1em; }
+            .total-amount { font-size: 1.2em; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>赴合肥市、邢台市开展养老大健康产业招商报销费用清单</h1>
+        <p class="trip-info">时间：2025年3月27日（星期四）— 3月29日（星期六）</p>
+
+        <!-- 3月27日 -->
+        <h2>2025年3月27日 (星期四)</h2>
+        <ul class="expense-list">
+            <li>
+                <span class="expense-description">车票 <small>武汉站 — 邢台东站</small></span>
+                <span class="expense-amount">327.00 元</span>
+            </li>
+            <li>
+                <span class="expense-description">住宿费</span>
+                <span class="expense-amount">310.00 元</span>
+            </li>
+        </ul>
+
+        <!-- 3月28日 -->
+        <h2>2025年3月28日 (星期五)</h2>
+        <ul class="expense-list">
+            <li>
+                <span class="expense-description">车票 <small>邢台东站 — 郑州东站</small></span>
+                <span class="expense-amount">147.00 元</span>
+            </li>
+             <li>
+                <span class="expense-description">车票 <small>郑州东站 — 合肥南站</small></span>
+                <span class="expense-amount">314.50 元</span>
+            </li>
+            <li>
+                <span class="expense-description">住宿费</span>
+                <span class="expense-amount">350.00 元</span>
+            </li>
+        </ul>
+
+        <!-- 3月29日 -->
+        <h2>2025年3月29日 (星期六)</h2>
+        <ul class="expense-list">
+            <li>
+                <span class="expense-description">车票 <small>合肥南站 — 汉口站</small></span>
+                <span class="expense-amount">133.00 元</span>
+            </li>
+        </ul>
+
+        <!-- 费用合计 -->
+        <div class="total-section">
+            <span class="total-label">费用合计:</span>
+            <span class="total-amount">1581.50 元</span>
+        </div>
+
+    </div>
+
+</body>
+</html>
