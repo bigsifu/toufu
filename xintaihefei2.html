@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>赴合肥市、邢台市开展养老大健康产业招商报销费用清单</title>
+    <style>
+        /* 全局样式 */
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f9; /* 更柔和的背景色 */
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px; /* 稍微加宽以适应表格 */
+            margin: 25px auto;
+            padding: 15px;
+            background-color: #f4f7f9; /* 与 body 背景一致，卡片会使用白色 */
+        }
+
+        /* 标题 */
+        h1 {
+            text-align: center;
+            color: #2c3e50; /* 深蓝灰色 */
+            font-size: 1.8em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .trip-duration {
+             text-align: center;
+             color: #7f8c8d; /* 灰色 */
+             margin-bottom: 30px;
+             font-size: 1em;
+        }
+
+        /* 每日费用卡片 */
+        .day-card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* 更柔和的阴影 */
+            overflow: hidden; /* 确保内容不溢出 */
+        }
+        .day-card h2 {
+            color: #3498db; /* 蓝色 */
+            border-bottom: 2px solid #ecf0f1; /* 浅灰色下划线 */
+            padding-bottom: 10px;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            font-weight: 500;
+        }
+
+        /* 费用表格 */
+        .expense-table-wrapper {
+             overflow-x: auto; /* 允许表格水平滚动（针对小屏幕） */
+            margin-bottom: 15px; /* 表格和发票区域的间距 */
+        }
+        .expense-table {
+            width: 100%;
+            border-collapse: collapse; /* 合并边框 */
+            font-size: 0.95em;
+        }
+        .expense-table th,
+        .expense-table td {
+            padding: 12px 10px; /* 增加单元格内边距 */
+            text-align: left;
+            border-bottom: 1px solid #eee; /* 更细的行分隔线 */
+        }
+        .expense-table th {
+            background-color: #f8f9fa; /* 表头浅灰色背景 */
+            color: #555;
+            font-weight: 600; /* 表头加粗 */
+            white-space: nowrap; /* 防止表头换行 */
+        }
+        .expense-table td.category {
+            color: #888;
+            font-weight: 500;
+            min-width: 70px; /* 类别列最小宽度 */
+        }
+        .expense-table td.description {
+            color: #444;
+        }
+        .expense-table td.amount {
+            font-weight: 600;
+            color: #e74c3c; /* 红色金额 */
+            text-align: right;
+            min-width: 90px; /* 金额列最小宽度 */
+            white-space: nowrap;
+        }
+        /* 表格最后一行无下边框 */
+        .expense-table tr:last-child td {
+             border-bottom: none;
+        }
+
+        /* 发票区域 */
+        .invoice-area {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9; /* 轻微区分背景 */
+            border-radius: 6px;
+            border: 1px solid #eee;
+        }
+        .invoice-area h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            color: #3498db; /* 与日期标题同色 */
+            font-weight: 500;
+        }
+        .department-invoices {
+            margin-bottom: 15px; /* 部门间距 */
+        }
+        .department-invoices:last-child {
+             margin-bottom: 0;
+        }
+        .department-name {
+            display: block;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+        /* 新的下载按钮样式 */
+        .invoice-button {
+            display: inline-block;
+            background-color: #3498db; /* 主题蓝色 */
+            color: white;
+            padding: 7px 15px; /* 调整内边距 */
+            margin: 4px 6px 4px 0;
+            text-decoration: none;
+            border-radius: 20px; /* 圆角胶囊形状 */
+            font-size: 0.85em; /* 稍小字体 */
+            transition: all 0.3s ease; /* 平滑过渡效果 */
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
+        }
+        .invoice-button:hover {
+            background-color: #2980b9; /* 悬停时深一点的蓝色 */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* 悬停阴影加深 */
+            transform: translateY(-1px); /* 轻微上移效果 */
+        }
+        .invoice-button::before { /* 可选：添加小图标（简单Unicode） */
+            content: "📄 "; /* 文件图标 */
+            margin-right: 3px;
+        }
+
+
+        /* 费用合计 */
+        .total-summary {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            border-top: 4px solid #3498db; /* 顶部蓝色强调线 */
+        }
+        .total-label {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50; /* 深蓝灰色 */
+            margin-right: 10px;
+        }
+        .total-amount {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #e74c3c; /* 红色总金额 */
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .container {
+                margin: 15px;
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.6em;
+            }
+            .day-card {
+                padding: 15px;
+            }
+            .day-card h2 {
+                 font-size: 1.3em;
+            }
+            .expense-table {
+                 font-size: 0.9em; /* 移动端表格字体稍小 */
+            }
+             .expense-table th,
+            .expense-table td {
+                padding: 10px 8px;
+            }
+            .invoice-area {
+                 padding: 12px;
+            }
+            .invoice-button {
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+            .total-label {
+                display: block; /* 在小屏幕上标签和金额堆叠 */
+                margin-right: 0;
+                margin-bottom: 5px;
+                 font-size: 1.2em;
+            }
+            .total-amount {
+                font-size: 1.6em;
+            }
+        }
+         @media (max-width: 480px) {
+             h1 { font-size: 1.4em; }
+             .day-card h2 { font-size: 1.2em; }
+             .invoice-button { display: block; margin: 8px auto; width: 80%; } /* 按钮在极小屏幕上占满宽度 */
+         }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>赴合肥市、邢台市 养老大健康产业招商</h1>
+        <p class="trip-duration">报销费用清单 (2025年3月27日 — 3月29日)</p>
+
+        <!-- 3月27日 -->
+        <div class="day-card">
+            <h2>2025年3月27日（星期四）</h2>
+            <div class="expense-table-wrapper">
+                <table class="expense-table">
+                    <thead>
+                        <tr>
+                            <th>类别</th>
+                            <th>说明</th>
+                            <th style="text-align: right;">金额 (元)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="category">交通费</td>
+                            <td class="description">武汉站 — 邢台东站</td>
+                            <td class="amount"><span class="num">327.00</span></td>
+                        </tr>
+                        <tr>
+                            <td class="category">住宿费</td>
+                            <td class="description">邢台市住宿</td>
+                            <td class="amount"><span class="num">310.00</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="invoice-area">
+                <h3>住宿费发票下载</h3>
+                <div class="department-invoices">
+                    <span class="department-name">黄冈市民政局:</span>
+                    <a href="https://nnfp.jss.com.cn/6OacPeNOFM-Eo7X" target="_blank" rel="noopener noreferrer" class="invoice-button">发票 1</a>
+                    <a href="https://nnfp.jss.com.cn/6Dw53wsWFM-Tnl0" target="_blank" rel="noopener noreferrer" class="invoice-button">发票 2</a>
+                    <a href="https://nnfp.jss.com.cn/6ibRA3PaFM-EPmb" target="_blank" rel="noopener noreferrer" class="invoice-button">发票 3</a>
+                </div>
+                <div class="department-invoices">
+                    <span class="department-name">黄州区民政局:</span>
+                    <a href="https://nnfp.jss.com.cn/90h9qdOOFM-1boxV" target="_blank" rel="noopener noreferrer" class="invoice-button">下载发票</a>
+                </div>
+                 <div class="department-invoices">
+                    <span class="department-name">黄冈市发改委:</span>
+                    <a href="https://nnfp.jss.com.cn/9Kt0jHTWFM-JDCa" target="_blank" rel="noopener noreferrer" class="invoice-button">下载发票</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3月28日 -->
+        <div class="day-card">
+            <h2>2025年3月28日（星期五）</h2>
+            <div class="expense-table-wrapper">
+                <table class="expense-table">
+                     <thead>
+                        <tr>
+                            <th>类别</th>
+                            <th>说明</th>
+                            <th style="text-align: right;">金额 (元)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="category">交通费</td>
+                            <td class="description">邢台东站 — 郑州东站</td>
+                            <td class="amount"><span class="num">147.00</span></td>
+                        </tr>
+                        <tr>
+                            <td class="category">交通费</td>
+                            <td class="description">郑州东站 — 合肥南站</td>
+                            <td class="amount"><span class="num">314.50</span></td>
+                        </tr>
+                         <tr>
+                            <td class="category">住宿费</td>
+                            <td class="description">合肥市住宿</td>
+                            <td class="amount"><span class="num">350.00</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+             </div>
+             <div class="invoice-area">
+                 <h3>住宿费发票下载</h3>
+                 <div class="department-invoices">
+                     <span class="department-name">黄冈市民政局:</span>
+                     <a href="https://pis.baiwang.com/smkp-vue/previewInvoiceAllEle?param=7551B30E44CFB4CA7DBFE891347CF1B04A1A446C0370F2C8ABDC4C7A1C727FA4CD4F5346E1326ABBC6BDE9A189BD2564" target="_blank" rel="noopener noreferrer" class="invoice-button">发票 1</a>
+                     <a href="https://pis.baiwang.com/smkp-vue/previewInvoiceAllEle?param=7551B30E44CFB4CA7DBFE891347CF1B04A1A446C0370F2C8ABDC4C7A1C727FA46F8AFD9974ED7BDD6DBA0B768B75B871" target="_blank" rel="noopener noreferrer" class="invoice-button">发票 2</a>
+                     <a href="https://pis.baiwang.com/smkp-vue/previewInvoiceAllEle?param=7551B30E44CFB4CA7DBFE891347CF1B04A1A446C0370F2C8ABDC4C7A1C727FA4FC11DF486E915759B5412525A5FF7EC5" target="_blank" rel="noopener noreferrer" class="invoice-button">发票 3</a>
+                 </div>
+                 <div class="department-invoices">
+                     <span class="department-name">黄冈市发改委:</span>
+                     <a href="https://pis.baiwang.com/smkp-vue/previewInvoiceAllEle?param=7551B30E44CFB4CA7DBFE891347CF1B04A1A446C0370F2C8ABDC4C7A1C727FA44D4800C9F554AAD88A31D2BEC093557E" target="_blank" rel="noopener noreferrer" class="invoice-button">下载发票</a>
+                 </div>
+                 <div class="department-invoices">
+                     <span class="department-name">黄州区民政局:</span>
+                     <a href="https://pis.baiwang.com/smkp-vue/previewInvoiceAllEle?param=7551B30E44CFB4CA7DBFE891347CF1B04A1A446C0370F2C8ABDC4C7A1C727FA442A53741142FE4DA74C0452BC5BCFCE1" target="_blank" rel="noopener noreferrer" class="invoice-button">下载发票</a>
+                 </div>
+            </div>
+        </div>
+
+        <!-- 3月29日 -->
+        <div class="day-card">
+            <h2>2025年3月29日（星期六）</h2>
+             <div class="expense-table-wrapper">
+                <table class="expense-table">
+                    <thead>
+                        <tr>
+                            <th>类别</th>
+                            <th>说明</th>
+                            <th style="text-align: right;">金额 (元)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="category">交通费</td>
+                            <td class="description">合肥南站 — 汉口站</td>
+                            <td class="amount"><span class="num">133.00</span></td>
+                        </tr>
+                     </tbody>
+                </table>
+             </div>
+             <!-- Note: No accommodation invoice section for this day -->
+        </div>
+
+        <!-- 费用合计 -->
+        <div class="total-summary">
+            <span class="total-label">费用合计:</span>
+            <span id="totalAmount" class="total-amount">计算中...</span>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 选择表格中所有包含金额的单元格内的 span 元素
+            const amountElements = document.querySelectorAll('.expense-table td.amount span.num');
+            let total = 0;
+
+            amountElements.forEach(element => {
+                const amountText = element.textContent.trim();
+                const amount = parseFloat(amountText);
+                if (!isNaN(amount)) {
+                    total += amount;
+                } else {
+                    console.warn('无法解析金额:', element.textContent);
+                }
+            });
+
+            const totalAmountElement = document.getElementById('totalAmount');
+            // 格式化总额，保留两位小数，并添加货币符号
+            totalAmountElement.textContent = '¥ ' + total.toFixed(2);
+        });
+    </script>
+</body>
+</html>
