@@ -2,118 +2,106 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>黄冈市到北京市驾车路线 - 百度地图</title>
+    <title>百度地图 - 黄冈市县市区范围</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <style type="text/css">
-        /* Basic styling for the map container */
-        body, html {
+        body, html, #map_container {
             width: 100%;
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Prevent scrollbars on the body */
+            overflow: hidden; /* Prevent scrollbars */
             font-family: "微软雅黑", sans-serif;
         }
-        #map_container {
-            width: 100%;
-            height: 100%; /* Make map take full page */
-        }
-        /* Optional: Style for the driving route textual directions panel */
-        #results_panel {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 300px; /* Adjust width as needed */
-            max-height: 90%; /* Adjust height as needed */
-            overflow-y: auto; /* Add scroll if content overflows */
-            background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
-            border: 1px solid #ccc;
-            padding: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,.3);
-            z-index: 10; /* Ensure it's above the map */
-            font-size: 12px;
-        }
          /* Hide Baidu logo text link, but keep the image logo */
-         .BMap_cpyCtrl span, .anchorBL a {
-             display: none !important;
-         }
+        .BMap_cpyCtrl span, .anchorBL a {
+            display: none !important;
+        }
     </style>
-    <!-- 1. Load Baidu Maps JavaScript API - IMPORTANT: Replace YOUR_BAIDU_MAP_AK with your actual key -->
-    <!-- Make sure to use HTTP or HTTPS consistently with how you host the page -->
+    <!-- 1. Load Baidu Maps JavaScript API - 使用协议相对URL, 替换 YOUR_BAIDU_MAP_AK -->
     <script type="text/javascript" src="//api.map.baidu.com/api?v=3.0&ak=GrmGwPn6ihBEV1MHRtyozXm4kpUuGf6F"></script>
 </head>
 <body>
     <!-- 2. Create a div element to hold the map -->
     <div id="map_container"></div>
 
-    <!-- 3. (Optional) Create a div to display the textual driving directions -->
-    <div id="results_panel">正在加载路线详情...</div>
-
     <script type="text/javascript">
         // --- Baidu Map Initialization ---
-        var map = new BMap.Map("map_container"); // Initialize map, linked to the div ID
+        // Ensure BMap object exists before proceeding
+        if (typeof BMap !== "undefined" && BMap.Map) {
+            var map = new BMap.Map("map_container");
 
-        // Note: We don't set center and zoom initially,
-        // as the driving route search will automatically adjust the viewport.
-        // map.centerAndZoom(new BMap.Point(116.404, 39.915), 5); // Example: Center roughly
+            // --- 设置地图中心点和缩放级别 ---
+            // 黄冈市的大致中心经纬度 (可以根据需要微调)
+            var centerPoint = new BMap.Point(114.879779, 30.447395);
+            // 设置一个合适的缩放级别以显示整个黄冈市范围
+            map.centerAndZoom(centerPoint, 9); // Zoom level 9-10 usually works for a city extent
 
-        map.enableScrollWheelZoom(true);     // Enable map zooming using scroll wheel
-        map.enableContinuousZoom(true);    // Enable continuous zoom effect
-        map.addControl(new BMap.NavigationControl()); // Add pan/zoom controls
-        map.addControl(new BMap.ScaleControl());      // Add scale control
-        map.addControl(new BMap.OverviewMapControl());// Add overview map (mini map)
+            map.enableScrollWheelZoom(true);     // Enable map zooming using scroll wheel
+            map.enableContinuousZoom(true);    // Enable continuous zoom effect
+            map.addControl(new BMap.NavigationControl()); // Add pan/zoom controls
+            map.addControl(new BMap.ScaleControl());      // Add scale control
+            map.addControl(new BMap.OverviewMapControl());// Add overview map (mini map)
 
-        // --- Driving Route Search ---
-        var startPoint = "黄冈市政府"; // Origin city name
-        var endPoint = "北京市天坛公园";   // Destination city name
+            // --- 黄冈市下辖县市区列表 ---
+            // (请根据最新行政区划核对，这里基于常见认知)
+            var districts = [
+                "黄冈市黄州区", "黄冈市团风县", "黄冈市红安县",
+                "黄冈市罗田县", "黄冈市英山县", "黄冈市浠水县",
+                "黄冈市蕲春县", "黄冈市黄梅县", "黄冈市武穴市",
+                "黄冈市麻城市"
+            ];
 
-        // Create Driving Route Search object
-        var driving = new BMap.DrivingRoute(map, {
-            renderOptions: {
-                map: map,             // Render route on this map
-                panel: "results_panel", // Display textual directions in this div ID
-                autoViewport: true    // Automatically adjust map viewport to fit the route
-            },
-            onSearchComplete: function(results) {
-                // Check if the search was successful
-                if (driving.getStatus() == BMAP_STATUS_SUCCESS) {
-                    // Get the first driving route plan
-                    var plan = results.getPlan(0);
-                    var distance = plan.getDistance(true); // Get distance string (e.g., "1050公里")
-                    var duration = plan.getDuration(true); // Get duration string (e.g., "12小时30分钟")
+            // --- 预定义一些颜色用于绘制边界 ---
+            var colors = ["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF",
+                          "#00FFFF", "#FFA500", "#800080", "#008000", "#4682B4"];
+            var colorIndex = 0;
 
-                    console.log("路线规划成功！");
-                    console.log("预计距离: " + distance);
-                    console.log("预计时间: " + duration);
+            // --- 获取并绘制行政区边界 ---
+            var boundary = new BMap.Boundary();
 
-                    // Optional: Prepend summary to the results panel
-                    var summaryDiv = document.createElement('div');
-                    summaryDiv.style.fontWeight = 'bold';
-                    summaryDiv.style.marginBottom = '10px';
-                    summaryDiv.innerHTML = `从 ${startPoint} 到 ${endPoint}：<br>距离约 ${distance}，预计时间 ${duration}`;
-                    var panel = document.getElementById('results_panel');
-                    // Clear "loading" message only if results are valid
-                    // The panel might already be populated by renderOptions
-                    // panel.innerHTML = ''; // Clear previous content if needed
-                    // panel.insertBefore(summaryDiv, panel.firstChild); // Add summary at the top
-                } else {
-                    console.error("路线规划失败: " + driving.getStatus());
-                    document.getElementById('results_panel').innerHTML = "未能找到从 " + startPoint + " 到 " + endPoint + " 的驾车路线。请检查地名或网络连接。";
-                    // You could display an alert or message on the page
-                    alert("抱歉，未能找到有效的驾车路线。状态码：" + driving.getStatus());
-                }
-            },
-            onSearchError: function() {
-                 console.error("路线规划请求出错！");
-                 document.getElementById('results_panel').innerHTML = '路线规划请求失败，请检查网络或API密钥。';
-                 alert("路线规划请求失败！");
-            }
-        });
+            districts.forEach(function(districtName) {
+                // 为闭包创建一个局部变量存储当前颜色
+                var currentStrokeColor = colors[colorIndex % colors.length];
+                var currentFillColor = colors[colorIndex % colors.length]; // 可以用同色或不同色填充
+                colorIndex++;
 
-        // --- Execute the Search ---
-        // Use city names directly, Baidu Maps API will geocode them
-        driving.search(startPoint, endPoint);
+                boundary.get(districtName, function(result) {
+                    if (result && result.boundaries && result.boundaries.length > 0) {
+                        var boundaryCount = result.boundaries.length; // 一个行政区可能有多个不连续区域
+                        console.log("找到 " + districtName + " 的边界: " + boundaryCount + " 个部分");
 
+                        for (var i = 0; i < boundaryCount; i++) {
+                            // 创建多边形覆盖物
+                            var polygon = new BMap.Polygon(result.boundaries[i], {
+                                strokeWeight: 2,         // 边线宽度
+                                strokeColor: currentStrokeColor, // 边线颜色
+                                strokeOpacity: 0.8,      // 边线透明度
+                                fillColor: currentFillColor,     // 填充颜色
+                                fillOpacity: 0.20        // 填充透明度 (设置低一些能看到地图底图)
+                            });
+                            map.addOverlay(polygon); // 将多边形添加到地图上
+
+                            // (可选) 可以在区域中心添加标签或其他信息
+                            // var center = polygon.getBounds().getCenter();
+                            // var label = new BMap.Label(districtName.replace("黄冈市",""), { position: center, offset: new BMap.Size(-20, -10) });
+                            // map.addOverlay(label);
+                        }
+                    } else {
+                        console.warn("未能获取到 '" + districtName + "' 的边界数据。");
+                        // 可以在页面上提示用户哪些区域未能加载
+                    }
+                });
+            });
+
+            console.log("已开始请求所有区县的边界数据...");
+
+        } else {
+            // Critical Error: Baidu Maps API script did not load correctly
+            console.error("错误：BMap API 未能成功加载！请检查网络连接、AK是否正确以及浏览器控制台报错信息。");
+            alert('错误：无法加载百度地图API！请检查AK和网络。');
+            document.getElementById('map_container').innerHTML = '<div style="padding: 20px; text-align: center; color: red;">错误：无法加载百度地图API。<br>请确认您的API密钥(AK)是否正确填写，并且网络连接正常。<br>同时，请检查浏览器控制台(F12)获取详细错误信息，特别是关于AK验证失败或网络请求失败的提示。</div>';
+        }
     </script>
 </body>
 </html>
