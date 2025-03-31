@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>百度地图 - 黄冈市县市区范围</title>
+    <title>百度地图 - 高亮黄冈市及县市区范围 (初始比例约20km)</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <style type="text/css">
         body, html, #map_container {
@@ -10,97 +10,166 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Prevent scrollbars */
+            overflow: hidden;
             font-family: "微软雅黑", sans-serif;
         }
-         /* Hide Baidu logo text link, but keep the image logo */
+        /* 隐藏百度logo文字链接 */
         .BMap_cpyCtrl span, .anchorBL a {
             display: none !important;
         }
+        /* (可选) 提示信息样式 */
+        #infoPanel {
+             position: absolute;
+             bottom: 10px;
+             left: 10px;
+             background-color: rgba(255, 255, 255, 0.8);
+             padding: 5px 10px;
+             border-radius: 3px;
+             font-size: 12px;
+             z-index: 10;
+         }
     </style>
-    <!-- 1. Load Baidu Maps JavaScript API - 使用协议相对URL, 替换 YOUR_BAIDU_MAP_AK -->
+    <!-- 1. Load Baidu Maps JavaScript API - 使用您提供的AK -->
     <script type="text/javascript" src="//api.map.baidu.com/api?v=3.0&ak=GrmGwPn6ihBEV1MHRtyozXm4kpUuGf6F"></script>
 </head>
 <body>
-    <!-- 2. Create a div element to hold the map -->
+    <!-- 2. Map container -->
     <div id="map_container"></div>
+    <!-- (可选) 信息提示面板 -->
+    <div id="infoPanel">正在加载地图和边界数据...</div>
 
     <script type="text/javascript">
         // --- Baidu Map Initialization ---
-        // Ensure BMap object exists before proceeding
+        var infoPanel = document.getElementById('infoPanel'); // 获取提示面板元素
+
         if (typeof BMap !== "undefined" && BMap.Map) {
-            var map = new BMap.Map("map_container");
-
-            // --- 设置地图中心点和缩放级别 ---
-            // 黄冈市的大致中心经纬度 (可以根据需要微调)
-            var centerPoint = new BMap.Point(114.879779, 30.447395);
-            // 设置一个合适的缩放级别以显示整个黄冈市范围
-            map.centerAndZoom(centerPoint, 9); // Zoom level 9-10 usually works for a city extent
-
-            map.enableScrollWheelZoom(true);     // Enable map zooming using scroll wheel
-            map.enableContinuousZoom(true);    // Enable continuous zoom effect
-            map.addControl(new BMap.NavigationControl()); // Add pan/zoom controls
-            map.addControl(new BMap.ScaleControl());      // Add scale control
-            map.addControl(new BMap.OverviewMapControl());// Add overview map (mini map)
-
-            // --- 黄冈市下辖县市区列表 ---
-            // (请根据最新行政区划核对，这里基于常见认知)
-            var districts = [
-                "黄冈市黄州区", "黄冈市团风县", "黄冈市红安县",
-                "黄冈市罗田县", "黄冈市英山县", "黄冈市浠水县",
-                "黄冈市蕲春县", "黄冈市黄梅县", "黄冈市武穴市",
-                "黄冈市麻城市"
-            ];
-
-            // --- 预定义一些颜色用于绘制边界 ---
-            var colors = ["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF",
-                          "#00FFFF", "#FFA500", "#800080", "#008000", "#4682B4"];
-            var colorIndex = 0;
-
-            // --- 获取并绘制行政区边界 ---
-            var boundary = new BMap.Boundary();
-
-            districts.forEach(function(districtName) {
-                // 为闭包创建一个局部变量存储当前颜色
-                var currentStrokeColor = colors[colorIndex % colors.length];
-                var currentFillColor = colors[colorIndex % colors.length]; // 可以用同色或不同色填充
-                colorIndex++;
-
-                boundary.get(districtName, function(result) {
-                    if (result && result.boundaries && result.boundaries.length > 0) {
-                        var boundaryCount = result.boundaries.length; // 一个行政区可能有多个不连续区域
-                        console.log("找到 " + districtName + " 的边界: " + boundaryCount + " 个部分");
-
-                        for (var i = 0; i < boundaryCount; i++) {
-                            // 创建多边形覆盖物
-                            var polygon = new BMap.Polygon(result.boundaries[i], {
-                                strokeWeight: 2,         // 边线宽度
-                                strokeColor: currentStrokeColor, // 边线颜色
-                                strokeOpacity: 0.8,      // 边线透明度
-                                fillColor: currentFillColor,     // 填充颜色
-                                fillOpacity: 0.20        // 填充透明度 (设置低一些能看到地图底图)
-                            });
-                            map.addOverlay(polygon); // 将多边形添加到地图上
-
-                            // (可选) 可以在区域中心添加标签或其他信息
-                            // var center = polygon.getBounds().getCenter();
-                            // var label = new BMap.Label(districtName.replace("黄冈市",""), { position: center, offset: new BMap.Size(-20, -10) });
-                            // map.addOverlay(label);
-                        }
-                    } else {
-                        console.warn("未能获取到 '" + districtName + "' 的边界数据。");
-                        // 可以在页面上提示用户哪些区域未能加载
-                    }
-                });
+            var map = new BMap.Map("map_container", {
+                // minZoom: 9, // (可选) 限制最小缩放级别
+                // maxZoom: 12 // (可选) 限制最大缩放级别
             });
 
-            console.log("已开始请求所有区县的边界数据...");
+            // --- 设置地图中心点和初始缩放级别 ---
+            var centerPoint = new BMap.Point(114.879779, 30.447395); // 黄冈市大致中心
+            // 尝试设置Zoom Level 10, 在此纬度下比例尺可能接近20km
+            // 您可以调整这个值 (9 或 11) 来观察比例尺变化
+            var initialZoom = 10;
+            map.centerAndZoom(centerPoint, initialZoom);
+
+            map.enableScrollWheelZoom(true);
+            map.enableContinuousZoom(true);
+            map.addControl(new BMap.NavigationControl());
+            map.addControl(new BMap.ScaleControl({ anchor: BMAP_ANCHOR_BOTTOM_LEFT })); // 比例尺放左下角
+            map.addControl(new BMap.OverviewMapControl());
+
+            // --- 获取"黄冈市"整体边界用于创建遮罩 ---
+            var boundary = new BMap.Boundary();
+            var huanggangCityName = "黄冈市";
+
+            boundary.get(huanggangCityName, function(cityResult) {
+                if (cityResult && cityResult.boundaries && cityResult.boundaries.length > 0) {
+                    console.log("成功获取到 " + huanggangCityName + " 的整体边界。");
+                    infoPanel.innerHTML = "正在绘制高亮区域和区县边界...";
+
+                    // --- 创建外部遮罩效果 ---
+                    // 1. 定义一个非常大的区域覆盖整个可见地图外围
+                    //    这里的坐标需要足够大，确保能覆盖用户可能拖动的范围
+                    //    注意：百度地图坐标系可能不是标准的 WGS84，但大致范围适用
+                    var outerBoundary = [
+                        new BMap.Point(-180, -90), new BMap.Point(180, -90),
+                        new BMap.Point(180, 90), new BMap.Point(-180, 90)
+                    ];
+
+                    // 2. 准备黄冈市边界数据点 (可能有多段)
+                    var huanggangPoints = [];
+                    cityResult.boundaries.forEach(function(boundaryStr) {
+                        var points = boundaryStr.split(';').map(function(ptStr) {
+                            var parts = ptStr.split(',');
+                            return new BMap.Point(parseFloat(parts[0]), parseFloat(parts[1]));
+                        });
+                        huanggangPoints.push(points); // 添加一个边界环
+                    });
+
+
+                    // 3. 创建一个"挖洞"的多边形作为遮罩
+                    //    第一个数组是外边界，后面的数组是内部"洞"的边界
+                    var maskPoints = [outerBoundary].concat(huanggangPoints);
+
+                    var maskPolygon = new BMap.Polygon(maskPoints, {
+                        fillColor: "#808080",   // 遮罩颜色 (灰色)
+                        fillOpacity: 0.5,     // 遮罩透明度 (0.0 - 1.0)
+                        strokeWeight: 0,      // 遮罩本身不需要边框
+                        strokeColor: "none"
+                    });
+                    map.addOverlay(maskPolygon);
+                    console.log("外部遮罩已添加。");
+
+                    // --- 继续绘制黄冈市下辖各区县的边界 (在高亮区域内) ---
+                    drawSubDistricts();
+
+                } else {
+                    console.error("未能获取到 '" + huanggangCityName + "' 的整体边界，无法创建高亮效果。");
+                    infoPanel.innerHTML = "错误：无法获取黄冈市边界，无法高亮。正在尝试加载区县...";
+                    // 即使无法高亮，仍然尝试绘制区县
+                    drawSubDistricts();
+                }
+            });
+
+            // --- 绘制黄冈市下辖各区县边界的函数 ---
+            function drawSubDistricts() {
+                var districts = [
+                    "黄冈市黄州区", "黄冈市团风县", "黄冈市红安县",
+                    "黄冈市罗田县", "黄冈市英山县", "黄冈市浠水县",
+                    "黄冈市蕲春县", "黄冈市黄梅县", "黄冈市武穴市",
+                    "黄冈市麻城市"
+                ];
+                var colors = ["#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",
+                              "#FFFF33", "#A65628", "#F781BF", "#999999", "#66C2A5"];
+                var colorIndex = 0;
+                var loadedCount = 0; // 计数器，用于更新提示信息
+
+                districts.forEach(function(districtName) {
+                    var currentStrokeColor = colors[colorIndex % colors.length];
+                    colorIndex++;
+
+                    boundary.get(districtName, function(result) {
+                        loadedCount++;
+                        if (result && result.boundaries && result.boundaries.length > 0) {
+                            console.log("获取到 " + districtName + " 边界");
+                            var boundaryCount = result.boundaries.length;
+                            for (var i = 0; i < boundaryCount; i++) {
+                                var polygon = new BMap.Polygon(result.boundaries[i], {
+                                    strokeWeight: 2,
+                                    strokeColor: currentStrokeColor, // 使用鲜艳的边框色
+                                    strokeOpacity: 0.8,
+                                    fillColor: currentStrokeColor,     // 可以用同色填充
+                                    fillOpacity: 0.10        // 填充透明度低一些，突出边界线
+                                });
+                                map.addOverlay(polygon);
+                            }
+                        } else {
+                            console.warn("未能获取到 '" + districtName + "' 的边界数据。");
+                        }
+
+                        // 更新加载提示
+                        if (loadedCount === districts.length) {
+                             infoPanel.innerHTML = "黄冈市及各区县边界加载完成。";
+                             // 可以设置延时后隐藏提示
+                             setTimeout(function() { infoPanel.style.display = 'none'; }, 3000);
+                        } else {
+                             infoPanel.innerHTML = `正在加载区县边界 (${loadedCount}/${districts.length})...`;
+                        }
+                    });
+                });
+                 console.log("已开始请求所有区县的边界数据...");
+            }
 
         } else {
             // Critical Error: Baidu Maps API script did not load correctly
-            console.error("错误：BMap API 未能成功加载！请检查网络连接、AK是否正确以及浏览器控制台报错信息。");
-            alert('错误：无法加载百度地图API！请检查AK和网络。');
-            document.getElementById('map_container').innerHTML = '<div style="padding: 20px; text-align: center; color: red;">错误：无法加载百度地图API。<br>请确认您的API密钥(AK)是否正确填写，并且网络连接正常。<br>同时，请检查浏览器控制台(F12)获取详细错误信息，特别是关于AK验证失败或网络请求失败的提示。</div>';
+            var errorMsg = "错误：BMap API 未能成功加载！";
+            console.error(errorMsg + "请检查AK是否正确、网络是否通畅以及浏览器控制台(F12)报错信息。");
+            alert(errorMsg);
+            infoPanel.innerHTML = errorMsg; // 在面板显示错误
+            document.getElementById('map_container').innerHTML = '<div style="padding: 20px; text-align: center; color: red;">' + errorMsg + '<br>请确认API密钥(AK)是否正确，网络连接正常，并检查浏览器控制台(F12)获取详细信息。</div>';
         }
     </script>
 </body>
