@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简洁五子棋</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>简洁五子棋</h1>
+
+        <div class="controls">
+            <button id="new-game">新游戏</button>
+            <label for="difficulty">难度:</label>
+            <select id="difficulty">
+                <option value="easy">简单</option>
+                <option value="medium" selected>中等</option>
+                <option value="hard">困难</option>
+            </select>
+        </div>
+
+        <div class="board-container">
+            <canvas id="gomoku-board"></canvas>
+            <!-- Overlay for potential hover effects or messages -->
+            <div id="board-overlay"></div>
+        </div>
+
+
+        <div class="status" id="status-message">请开始游戏</div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
