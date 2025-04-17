@@ -1,0 +1,150 @@
+/* 基本样式 */
+body {
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #f0f0f0;
+    color: #333;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+h1 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+#status {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 20px;
+    min-height: 1.5em; /* 防止文字变化时布局跳动 */
+    color: #3498db;
+}
+
+/* 游戏棋盘 */
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(80px, 120px)); /* 响应式格子大小 */
+    grid-template-rows: repeat(3, minmax(80px, 120px));    /* 响应式格子大小 */
+    gap: 10px;
+    background-color: #bdc3c7;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    /* 防止AI思考时误触 */
+    pointer-events: auto; /* 默认可点击 */
+    transition: pointer-events 0.3s ease; /* 平滑过渡 */
+}
+
+.cell {
+    background-color: #ecf0f1;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3em; /* 初始字体大小 */
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    position: relative; /* 为了动画定位 */
+    overflow: hidden; /* 隐藏移除动画溢出 */
+}
+
+.cell:hover {
+    background-color: #dcdde1;
+}
+
+.cell.X {
+    color: #e74c3c; /* X 的颜色 */
+}
+
+.cell.O {
+    color: #2980b9; /* O 的颜色 */
+}
+
+/* 移除棋子动画 */
+@keyframes fadeOutPiece {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+}
+
+.cell.removing::before {
+    content: ''; /* 伪元素用于显示动画 */
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(255, 255, 255, 0.7); /* 半透明遮罩 */
+    animation: fadeOutPiece 0.6s forwards; /* 应用动画 */
+    z-index: 1; /* 确保在 X/O 上方 */
+}
+.cell.removing span { /* 让文字也跟着动画 */
+    display: inline-block; /* 使 transform 生效 */
+    animation: fadeOutPiece 0.6s forwards;
+    z-index: 2;
+}
+
+
+/* 按钮样式 */
+#resetButton {
+    padding: 10px 20px;
+    font-size: 1em;
+    color: white;
+    background-color: #3498db;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#resetButton:hover {
+    background-color: #2980b9;
+}
+
+/* 响应式设计 */
+@media (max-width: 600px) {
+    .game-board {
+        grid-template-columns: repeat(3, minmax(60px, 90px));
+        grid-template-rows: repeat(3, minmax(60px, 90px));
+        gap: 8px;
+        padding: 8px;
+    }
+
+    .cell {
+        font-size: 2.5em; /* 移动端稍小字体 */
+    }
+
+    h1 {
+        font-size: 1.8em;
+    }
+
+    #status {
+        font-size: 1em;
+    }
+
+    #resetButton {
+        padding: 8px 16px;
+        font-size: 0.9em;
+    }
+}
+
+/* 禁用棋盘点击时的样式 */
+.game-board.disabled {
+    pointer-events: none;
+    opacity: 0.7; /* 可选：视觉上表示不可用 */
+}
+
+/* 胜利/结束状态样式 (可选) */
+.cell.winner {
+    background-color: #2ecc71 !important; /* 获胜的格子高亮 */
+    color: white;
+}
